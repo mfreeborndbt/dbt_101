@@ -1,9 +1,9 @@
 sources:
-  - name: tpch
-    database: raw
-    schema: tpch_001
+  - name: TPCH
+    database: RAW
+    schema: TPCH_SF001
     tables:
-      - name: orders
-      - name: lineitem
-      - name: customer
-      - name: nation
+      - name: ORDERS
+      - name: LINEITEM
+      - name: CUSTOMER
+      - name: NATION
