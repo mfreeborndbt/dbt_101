@@ -1,0 +1,97 @@
+version: 2
+
+models:
+  - name: int_orders_line_items
+    description: >
+      Intermediate model that joins orders and line items.
+      This creates a denormalized view of order details at the line item level,
+      including calculated fields for pricing after discounts and taxes.
+    columns:
+      - name: order_key
+        description: Unique identifier for the order
+        tests:
+          - not_null
+      - name: customer_key
+        description: Foreign key to customer
+        tests:
+          - not_null
+      - name: order_status
+        description: Status of the order
+      - name: order_total_price
+        description: Total price of the entire order
+      - name: order_date
+        description: Date the order was placed
+        tests:
+          - not_null
+      - name: order_priority
+        description: Priority level of the order
+      - name: clerk
+        description: Clerk who processed the order
+      - name: ship_priority
+        description: Shipping priority
+      - name: line_number
+        description: Line number within the order
+        tests:
+          - not_null
+      - name: part_key
+        description: Part identifier
+      - name: supplier_key
+        description: Supplier identifier
+      - name: quantity
+        description: Quantity of items in this line
+      - name: extended_price
+        description: Extended price before discounts and taxes
+      - name: discount
+        description: Discount rate applied
+      - name: tax
+        description: Tax rate applied
+      - name: return_flag
+        description: Whether item was returned
+      - name: line_status
+        description: Status of the line item
+      - name: ship_date
+        description: Date the item was shipped
+      - name: commit_date
+        description: Committed delivery date
+      - name: receipt_date
+        description: Date the item was received
+      - name: ship_mode
+        description: Mode of shipping
+      - name: discounted_price
+        description: Price after applying discount
+      - name: final_price
+        description: Final price after discount and tax
+
+  - name: int_enriched_customers
+    description: >
+      Intermediate model that joins customers with their nation information.
+      This enriches customer data with geographic context.
+    columns:
+      - name: customer_key
+        description: Unique identifier for each customer
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: Name of the customer
+        tests:
+          - not_null
+      - name: customer_address
+        description: Customer's address
+      - name: phone_number
+        description: Customer's phone number
+      - name: account_balance
+        description: Customer's account balance
+      - name: market_segment
+        description: Market segment the customer belongs to
+      - name: nation_key
+        description: Foreign key to nation
+        tests:
+          - not_null
+      - name: nation_name
+        description: Name of the nation where customer is located
+        tests:
+          - not_null
+      - name: region_key
+        description: Foreign key to region
+

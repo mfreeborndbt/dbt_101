@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: customer_orders
+    description: >
+      Aggregated customer order metrics combining enriched customer data
+      with order line items. This mart provides a comprehensive view of
+      customer purchasing behavior and revenue metrics.
+    columns:
+      - name: customer_key
+        description: Unique identifier for each customer
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: Name of the customer
+        tests:
+          - not_null
+      - name: nation_name
+        description: Name of the nation where customer is located
+        tests:
+          - not_null
+      - name: region_key
+        description: Foreign key to region
+      - name: market_segment
+        description: Market segment the customer belongs to
+      - name: account_balance
+        description: Customer's account balance
+      - name: total_orders
+        description: Total number of orders placed by the customer
+        tests:
+          - not_null
+      - name: total_line_items
+        description: Total number of line items across all orders
+        tests:
+          - not_null
+      - name: first_order_date
+        description: Date of the customer's first order
+        tests:
+          - not_null
+      - name: most_recent_order_date
+        description: Date of the customer's most recent order
+        tests:
+          - not_null
+      - name: total_revenue
+        description: Total revenue before discounts and taxes
+      - name: total_revenue_after_discount
+        description: Total revenue after applying discounts
+      - name: total_revenue_final
+        description: Final total revenue after discounts and taxes
+        tests:
+          - not_null
+      - name: avg_line_item_revenue
+        description: Average revenue per line item
+      - name: avg_discount_rate
+        description: Average discount rate applied to customer's orders
+      - name: total_discount_amount
+        description: Total amount of discounts given to the customer
+      - name: total_quantity_ordered
+        description: Total quantity of items ordered
+      - name: avg_order_value
+        description: Average value per order (total revenue / total orders)
+        tests:
+          - not_null
+      - name: customer_lifetime_days
+        description: Number of days between first and most recent order
+
