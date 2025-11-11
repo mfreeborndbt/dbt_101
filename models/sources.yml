@@ -1,0 +1,9 @@
+sources:
+  - name: tpch
+    database: raw
+    schema: tpch_001
+    tables:
+      - name: orders
+      - name: lineitem
+      - name: customer
+      - name: nation
