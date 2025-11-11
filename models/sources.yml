@@ -1,0 +1,9 @@
+sources:
+  - name: TPCH
+    database: RAW
+    schema: TPCH_SF001
+    tables:
+      - name: ORDERS
+      - name: LINEITEM
+      - name: CUSTOMER
+      - name: NATION
