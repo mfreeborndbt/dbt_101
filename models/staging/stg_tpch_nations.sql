@@ -1,6 +1,3 @@
--- Staging model for NATION
--- Cleans column names and performs basic transformations
-
 with source as (
     select * from {{ source('TPCH', 'NATION') }}
 ),

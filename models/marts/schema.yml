@@ -1,67 +1,70 @@
 version: 2
 
 models:
-  - name: customer_orders
+  - name: monthly_gross_revenue
     description: >
-      Aggregated customer order metrics combining enriched customer data
-      with order line items. This mart provides a comprehensive view of
-      customer purchasing behavior and revenue metrics.
+      Monthly aggregated revenue and profitability metrics.
+      This mart provides executive-level reporting on revenue, costs, and margins
+      broken down by time period, geography, and market segment. Used for monthly
+      business reviews and financial reporting.
     columns:
-      - name: customer_key
-        description: Unique identifier for each customer
+      - name: order_month
+        description: First day of the month for the aggregation period (primary key part)
         tests:
-          - unique
           - not_null
-      - name: customer_name
-        description: Name of the customer
+      - name: region_name
+        description: Geographic region (primary key part)
         tests:
           - not_null
       - name: nation_name
-        description: Name of the nation where customer is located
+        description: Nation within the region (primary key part)
         tests:
           - not_null
-      - name: region_key
-        description: Foreign key to region
       - name: market_segment
-        description: Market segment the customer belongs to
-      - name: account_balance
-        description: Customer's account balance
+        description: Customer market segment (primary key part)
+        tests:
+          - not_null
       - name: total_orders
-        description: Total number of orders placed by the customer
+        description: Count of distinct orders in the period
+        tests:
+          - not_null
+      - name: total_customers
+        description: Count of distinct customers who ordered in the period
         tests:
           - not_null
       - name: total_line_items
-        description: Total number of line items across all orders
+        description: Count of line items ordered in the period
         tests:
           - not_null
-      - name: first_order_date
-        description: Date of the customer's first order
+      - name: gross_revenue
+        description: Total revenue before any discounts or taxes
         tests:
           - not_null
-      - name: most_recent_order_date
-        description: Date of the customer's most recent order
+      - name: discounted_revenue
+        description: Revenue after discounts but before taxes
         tests:
           - not_null
-      - name: total_revenue
-        description: Total revenue before discounts and taxes
-      - name: total_revenue_after_discount
-        description: Total revenue after applying discounts
-      - name: total_revenue_final
-        description: Final total revenue after discounts and taxes
+      - name: net_sales
+        description: Final revenue after discounts and taxes
         tests:
           - not_null
-      - name: avg_line_item_revenue
-        description: Average revenue per line item
+      - name: total_supply_cost
+        description: Total cost of goods sold (supply costs)
+        tests:
+          - not_null
+      - name: gross_profit
+        description: Total gross profit (net_sales - total_supply_cost)
+        tests:
+          - not_null
       - name: avg_discount_rate
-        description: Average discount rate applied to customer's orders
-      - name: total_discount_amount
-        description: Total amount of discounts given to the customer
-      - name: total_quantity_ordered
-        description: Total quantity of items ordered
-      - name: avg_order_value
-        description: Average value per order (total revenue / total orders)
-        tests:
-          - not_null
-      - name: customer_lifetime_days
-        description: Number of days between first and most recent order
+        description: Average discount rate applied during the period
+      - name: avg_quantity
+        description: Average quantity per line item
+      - name: avg_line_item_sales
+        description: Average net sales per line item
+      - name: gross_margin
+        description: Gross profit margin percentage (gross_profit / net_sales)
+    tests:
+      - unique:
+          column_name: "order_month || '-' || region_name || '-' || nation_name || '-' || market_segment"
 

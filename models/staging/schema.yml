@@ -1,10 +1,10 @@
 version: 2
 
 models:
-  - name: stg_customer
+  - name: stg_tpch_customers
     description: >
       Staging table for customer data from TPCH.
-      This model cleans column names and provides a consistent interface for downstream models.
+      Cleans and standardizes raw customer data with consistent naming conventions.
     columns:
       - name: customer_key
         description: Unique identifier for each customer
@@ -16,101 +16,30 @@ models:
         tests:
           - not_null
       - name: customer_address
-        description: Customer's address
+        description: Customer's mailing address
       - name: nation_key
         description: Foreign key to nation table
         tests:
           - not_null
+          - relationships:
+              config:
+                where: "nation_key is not null"
+              arguments:
+                to: ref('stg_tpch_nations')
+                field: nation_key
       - name: phone_number
         description: Customer's phone number
       - name: account_balance
-        description: Customer's account balance
+        description: Customer's current account balance
       - name: market_segment
-        description: Market segment the customer belongs to
+        description: Market segment classification (e.g., AUTOMOBILE, BUILDING)
       - name: comment
         description: Additional comments about the customer
 
-  - name: stg_orders
-    description: >
-      Staging table for orders data from TPCH.
-      This model cleans column names and provides a consistent interface for downstream models.
-    columns:
-      - name: order_key
-        description: Unique identifier for each order
-        tests:
-          - unique
-          - not_null
-      - name: customer_key
-        description: Foreign key to customer table
-        tests:
-          - not_null
-      - name: order_status
-        description: Status of the order (e.g., F, O, P)
-      - name: total_price
-        description: Total price of the order
-      - name: order_date
-        description: Date the order was placed
-        tests:
-          - not_null
-      - name: order_priority
-        description: Priority level of the order
-      - name: clerk
-        description: Clerk who processed the order
-      - name: ship_priority
-        description: Shipping priority
-      - name: comment
-        description: Additional comments about the order
-
-  - name: stg_lineitem
-    description: >
-      Staging table for line item data from TPCH.
-      This model cleans column names and provides a consistent interface for downstream models.
-    columns:
-      - name: order_key
-        description: Foreign key to orders table
-        tests:
-          - not_null
-      - name: part_key
-        description: Foreign key to part table
-        tests:
-          - not_null
-      - name: supplier_key
-        description: Foreign key to supplier table
-        tests:
-          - not_null
-      - name: line_number
-        description: Line number within the order
-        tests:
-          - not_null
-      - name: quantity
-        description: Quantity of items
-      - name: extended_price
-        description: Extended price (quantity * price)
-      - name: discount
-        description: Discount applied
-      - name: tax
-        description: Tax applied
-      - name: return_flag
-        description: Return flag status
-      - name: line_status
-        description: Line item status
-      - name: ship_date
-        description: Date the item was shipped
-      - name: commit_date
-        description: Committed delivery date
-      - name: receipt_date
-        description: Date the item was received
-      - name: ship_instructions
-        description: Shipping instructions
-      - name: ship_mode
-        description: Mode of shipping
-      - name: comment
-        description: Additional comments about the line item
-
-  - name: stg_nation
+  - name: stg_tpch_nations
     description: >
       Staging table for nation data from TPCH.
-      This model cleans column names and provides a consistent interface for downstream models.
+      Contains country-level geographic information.
     columns:
       - name: nation_key
         description: Unique identifier for each nation
@@ -125,6 +54,161 @@ models:
         description: Foreign key to region table
         tests:
           - not_null
+          - relationships:
+              config:
+                where: "region_key is not null"
+              arguments:
+                to: ref('stg_tpch_regions')
+                field: region_key
       - name: comment
         description: Additional comments about the nation
+
+  - name: stg_tpch_regions
+    description: >
+      Staging table for region data from TPCH.
+      Contains high-level geographic regions.
+    columns:
+      - name: region_key
+        description: Unique identifier for each region
+        tests:
+          - unique
+          - not_null
+      - name: region_name
+        description: Name of the region (e.g., AFRICA, AMERICA, ASIA, EUROPE, MIDDLE EAST)
+        tests:
+          - not_null
+      - name: comment
+        description: Additional comments about the region
+
+  - name: stg_tpch_ppch_items
+    description: >
+      Pre-joined staging table combining orders and line items.
+      This model creates order line items by joining orders with their associated line item details.
+    columns:
+      - name: order_key
+        description: Unique identifier for each order
+        tests:
+          - not_null
+      - name: line_number
+        description: Line item sequence number within the order
+        tests:
+          - not_null
+      - name: customer_key
+        description: Foreign key to customer
+        tests:
+          - not_null
+      - name: order_status
+        description: Status of the order (F=Fulfilled, O=Open, P=Pending)
+        tests:
+          - accepted_values:
+              config:
+                severity: warn
+              arguments:
+                values: ['F', 'O', 'P']
+      - name: order_total_price
+        description: Total price of the entire order
+      - name: order_date
+        description: Date the order was placed
+        tests:
+          - not_null
+      - name: order_priority
+        description: Priority classification of the order
+      - name: clerk
+        description: Clerk identifier who processed the order
+      - name: ship_priority
+        description: Shipping priority level
+      - name: order_comment
+        description: Comments about the order
+      - name: part_key
+        description: Foreign key to part table
+        tests:
+          - not_null
+      - name: supplier_key
+        description: Foreign key to supplier
+        tests:
+          - not_null
+      - name: quantity
+        description: Quantity of items ordered
+        tests:
+          - not_null
+      - name: extended_price
+        description: Extended price (list price * quantity)
+        tests:
+          - not_null
+      - name: discount
+        description: Discount percentage applied
+      - name: tax
+        description: Tax percentage applied
+      - name: return_flag
+        description: Return status flag (R=Returned, A=Accepted, N=Not Returned)
+      - name: line_status
+        description: Line item status (O=Open, F=Fulfilled)
+      - name: ship_date
+        description: Date the item was shipped
+      - name: commit_date
+        description: Committed delivery date
+      - name: receipt_date
+        description: Date the item was received
+      - name: ship_instructions
+        description: Shipping instructions
+      - name: ship_mode
+        description: Mode of shipment (e.g., AIR, MAIL, SHIP, TRUCK, RAIL)
+      - name: line_comment
+        description: Comments about the line item
+
+  - name: stg_tpch_part_suppliers
+    description: >
+      Staging table for part supplier relationships from TPCH.
+      Links parts with their suppliers and associated costs.
+    columns:
+      - name: part_key
+        description: Foreign key to part table (part of composite key)
+        tests:
+          - not_null
+      - name: supplier_key
+        description: Foreign key to supplier (part of composite key)
+        tests:
+          - not_null
+      - name: available_quantity
+        description: Quantity available from this supplier
+      - name: supply_cost
+        description: Cost to purchase from this supplier
+        tests:
+          - not_null
+      - name: comment
+        description: Additional comments about the part-supplier relationship
+    tests:
+      - unique:
+          column_name: "part_key || '-' || supplier_key"
+
+  - name: stg_tpch_parts
+    description: >
+      Staging table for parts data from TPCH.
+      Contains detailed information about parts that can be ordered.
+    columns:
+      - name: part_key
+        description: Unique identifier for each part
+        tests:
+          - unique
+          - not_null
+      - name: part_name
+        description: Name/description of the part
+        tests:
+          - not_null
+      - name: manufacturer
+        description: Manufacturer identifier
+      - name: brand
+        description: Brand name
+      - name: part_type
+        description: Type classification of the part
+      - name: part_size
+        description: Size of the part
+      - name: container
+        description: Container type for the part
+      - name: retail_price
+        description: Retail price of the part
+        tests:
+          - not_null
+      - name: comment
+        description: Additional comments about the part
 
